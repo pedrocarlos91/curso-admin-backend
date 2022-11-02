@@ -3,7 +3,7 @@ const { response } = require('express');
 const { validarJWT } = require('../middlewares/validar-jwt');
 
 const getHospitales = async (req, res) => {
-    const hospitales = await Hospital.find({}, 'nombre img usuario');
+    const hospitales = await Hospital.find().populate('usuario', 'nombre img');
     
     res.json({
         status: 'success',
@@ -13,15 +13,20 @@ const getHospitales = async (req, res) => {
 
 const crearHospital = async (req, res) => {
     const {nombre} = req.body;
-    const hospital = new Hospital (req.body);
-    try {
+    const uid = req.uid;
+    const hospital = new Hospital ({
+        usuario: uid,
+        ...req.body
+    });
 
-        await hospital.save();
+    try {
+        const hospitalCreada = await hospital.save();
         res.json({
             status: 'success',
-            hospital
+            hospital: hospitalCreada
         });
     } catch (error) {
+        console.log(error);
         res.status(403).json({
             status: 'error',
             message: error.message

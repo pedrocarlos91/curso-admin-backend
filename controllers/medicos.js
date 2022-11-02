@@ -3,7 +3,9 @@ const { response } = require('express');
 const { validarJWT } = require('../middlewares/validar-jwt');
 
 const getMedicos = async (req, res) => {
-    const medicos = await Medico.find({}, 'nombre img usuario');
+    const medicos = await Medico.find({}, 'nombre img usuario')
+                                .populate('usuario', 'nombre email img')
+                                .populate('hospital', 'nombre img');
     
     res.json({
         status: 'success',
@@ -12,8 +14,12 @@ const getMedicos = async (req, res) => {
 }
 
 const crearMedico = async (req, res) => {
-    const {nombre} = req.body;
-    const medico = new Medico (req.body);
+    const {nombre, hospital} = req.body;
+    const uid = req.uid;
+    const medico = new Medico ({
+        usuario: uid,
+        ...req.body
+    });
     try {
 
         await medico.save();
