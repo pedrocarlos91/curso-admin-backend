@@ -1,4 +1,5 @@
 const Medico = require('../models/medicos');
+const Hospital = require('../models/hospitales');
 const { response } = require('express');
 const { validarJWT } = require('../middlewares/validar-jwt');
 
@@ -36,22 +37,35 @@ const crearMedico = async (req, res) => {
 }
 
 const actualizarMedico = async(req, res = response) => {
-    const uid = req.params.id;
+    const uid = req.uid;
+    const id = req.params.id;
+
+
     try {
-        const usuarioDB = await Medico.findById(uid);
-        if(!usuarioDB) {
+        const medico = await Medico.findById(id);
+        if(!medico) {
             res.status(404).json({
                 status: 'error',
-                message: 'Este usuario no existe'
+                message: 'Este medico no existe'
             });
         }
 
-        const campos = req.body;
-        delete campos.password;
-        delete campos.google;
-        delete campos.email;
+        const cambios = {
+            ...req.body,
+            usuario: uid
+        }
 
-        const medicoActualizado = await Medico.findByIdAndUpdate(uid, campos, {new: true});
+        if(cambios.hospital) {
+            const hospital = await Hospital.findById(cambios.hospital);
+            if(!hospital) {
+                res.status(404).json({
+                    status: 'error',
+                    message: 'Este hospital no existe'
+                });
+            }
+        }
+
+        const medicoActualizado = await Medico.findByIdAndUpdate(id, cambios, {new: true});
         res.json({
             status: 'success',
             medicoActualizado
@@ -67,10 +81,10 @@ const actualizarMedico = async(req, res = response) => {
 }
 
 const deleteMedico = async(req, res = response) => {
-    const uid = req.params.id;
+    const id = req.params.id;
     try {
-        const medico = await Meidico.findById(uid);
-        if(!medico) {
+        const medicoId = await Medico.findById(id);
+        if(!medicoId) {
             res.status(404).json({
                 status: 'error',
                 message: 'Este medico no existe'
@@ -78,7 +92,7 @@ const deleteMedico = async(req, res = response) => {
         }
 
         
-        const medicoDeleted = await Medico.findByIdAndDelete(uid);
+        const medicoDeleted = await Medico.findByIdAndDelete(id);
         res.json({
             status: 'success',
             medicoDeleted

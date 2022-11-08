@@ -35,25 +35,27 @@ const crearHospital = async (req, res) => {
 }
 
 const actualizarHospital = async(req, res = response) => {
-    const uid = req.params.id;
+    const hospitalId = req.params.id;
+    const uid = req.uid;
     try {
-        const usuarioDB = await Usuario.findById(uid);
-        if(!usuarioDB) {
+        const hospital = await Hospital.findById(hospitalId);
+        if(!hospital) {
             res.status(404).json({
                 status: 'error',
-                message: 'Este usuario no existe'
+                message: 'Este hospital no existe'
             });
         }
 
-        const campos = req.body;
-        delete campos.password;
-        delete campos.google;
-        delete campos.email;
+        const cambios = {
+            ...req.body,
+            usuario: uid
+        }
+        
 
-        const usuarioActualizado = await Usuario.findByIdAndUpdate(uid, campos, {new: true});
+        const hospitalActualizada = await Hospital.findByIdAndUpdate(hospitalId, cambios, {new: true});
         res.json({
             status: 'success',
-            usuarioActualizado
+            hospitalActualizada
         });
 
     } catch (error) {
@@ -66,10 +68,10 @@ const actualizarHospital = async(req, res = response) => {
 }
 
 const deleteHospital = async(req, res = response) => {
-    const uid = req.params.id;
+    const hospitalId = req.params.id;
     try {
-        const usuarioDB = await Usuario.findById(uid);
-        if(!usuarioDB) {
+        const hospitalDB = await Hospital.findById(hospitalId);
+        if(!hospitalDB) {
             res.status(404).json({
                 status: 'error',
                 message: 'Este usuario no existe'
@@ -77,10 +79,10 @@ const deleteHospital = async(req, res = response) => {
         }
 
         
-        const usuarioDeleted = await Usuario.findByIdAndDelete(uid);
+        const hospitalDeleted = await Hospital.findByIdAndDelete(hospitalId);
         res.json({
             status: 'success',
-            usuarioDeleted
+            hospitalDeleted
         });
 
     } catch (error) {
