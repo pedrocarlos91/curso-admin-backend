@@ -35,7 +35,7 @@ const login = async (req, res) => {
     } catch (error) {
         res.status(403).json({
             status: 'error',
-            message: error.message
+            message: 'Usuario o contraseña no válidos'
         });
     } 
 }
@@ -82,13 +82,21 @@ const googleSignIn = async (req, res) => {
 }
 
 const renewToken = async(req, res = response) => {
-    const uid = req.uid;
-    const token = await generarJWT(uid.id);
+    try {
+        const uid = req.uid;
+        const token = await generarJWT(uid);
 
-    res.json({
-        ok: true,
-        token
-    })
+        res.json({
+            status: 'success',
+            token
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({
+            status: 'error',
+            message: 'Error al renovar el token'
+        });
+    }
 }
 
 module.exports = {
