@@ -64,7 +64,9 @@ const actualizarUsuario = async(req, res = response) => {
         const campos = req.body;
         delete campos.password;
         delete campos.google;
-        delete campos.email;
+        if (usuarioDB.google) {
+            delete campos.email;
+        }
 
         const usuarioActualizado = await Usuario.findByIdAndUpdate(uid, campos, {new: true});
         res.json({

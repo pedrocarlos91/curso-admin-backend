@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const Usuario = require('../models/usuario');
 const { generarJWT } = require('../helpers/jwt');
 const { googleVerify } = require('../helpers/google-verify');
+const { findById } = require('../models/usuario');
 
 const login = async (req, res) => {
     const {email, password} = req.body;
@@ -85,9 +86,11 @@ const renewToken = async(req, res = response) => {
     try {
         const uid = req.uid;
         const token = await generarJWT(uid);
+        const usuario = await Usuario.findById(uid);
 
         res.json({
             status: 'success',
+            usuario,
             token
         })
     } catch (error) {
